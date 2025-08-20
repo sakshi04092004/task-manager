@@ -1,94 +1,54 @@
-/* eslint-disable react/prop-types */
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-const Card = ({ title, description, onUpdate, onDelete, dragHandleProps, draggableProps, refProp }) => {
-  const [desc, setDesc] = useState(description);
-  const [isEdited, setIsEdited] = useState(false);
+const Card = ({ title, description, onUpdate, onDelete }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newDesc, setNewDesc] = useState(description);
 
-  // Sync description prop with local state
-  useEffect(() => {
-    setDesc(description);
-    setIsEdited(false); // reset editing state if description changes externally
-  }, [description]);
-
-  const handleDescChange = (e) => {
-    setDesc(e.target.value);
-    setIsEdited(true);
+  const handleSave = () => {
+    onUpdate(newDesc);
+    setIsEditing(false);
   };
-
-  // Save just the description
-  const saveDesc = () => {
-    if (isEdited) {
-      onUpdate({ description: desc });
-      setIsEdited(false);
-    }
-  };
-
-  // Full update: e.g., title + description
-  const handleFullUpdate = () => {
-  onUpdate({
-    title: "Updated Title",  // Update the title on backend
-    description: desc
-  });
-  alert("Updated successfully");  // Show popup to user
-  setIsEdited(false);
-};
-
 
   return (
-    <div className="card" {...draggableProps} ref={refProp}>
-      <div className="card-header" {...dragHandleProps}>
-        <h3>{title}</h3>
-      </div>
+    <div className="bg-white p-3 rounded-xl shadow-md border border-gray-200">
+      {/* Title */}
+      <h4 className="font-semibold text-gray-800">{title}</h4>
 
-      <textarea
-        value={desc}
-        onChange={handleDescChange}
-        placeholder="Enter description..."
-        style={{
-          width: "100%",
-          border: "1px solid #ccc",
-          padding: "0.5rem",
-          borderRadius: "6px",
-          minHeight: "60px",
-          margin: "0.75rem"
-        }}
-      />
-
-      {/* Save button only when description is edited */}
-      {isEdited && (
-        <div style={{ padding: "0 0.75rem 0.75rem" }}>
-          <button
-            onClick={saveDesc}
-            style={{
-              backgroundColor: "#28a745",
-              color: "white",
-              border: "none",
-              padding: "0.4rem 0.8rem",
-              borderRadius: "6px",
-              cursor: "pointer"
-            }}
-          >
-            💾 Save
-          </button>
-        </div>
+      {/* Description */}
+      {isEditing ? (
+        <textarea
+          className="w-full mt-2 p-2 border rounded-md text-sm"
+          value={newDesc}
+          onChange={(e) => setNewDesc(e.target.value)}
+        />
+      ) : (
+        <p className="text-sm text-gray-600 mt-1">{description}</p>
       )}
 
-      <div className="card-actions">
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-2 mt-2">
+        {isEditing ? (
+          <button
+            onClick={handleSave}
+            className="px-2 py-1 bg-green-500 text-white text-xs rounded-md"
+          >
+            Save
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsEditing(true)}
+            className="px-2 py-1 bg-blue-500 text-white text-xs rounded-md"
+          >
+            Edit
+          </button>
+        )}
+
         <button
-          onClick={handleFullUpdate}
-          style={{
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            padding: "0.4rem 0.8rem",
-            borderRadius: "6px",
-            cursor: "pointer"
-          }}
+          onClick={onDelete}
+          className="px-2 py-1 bg-red-500 text-white text-xs rounded-md"
         >
-          ✏️ Update
+          Delete
         </button>
-        <button onClick={onDelete}>🗑 Delete</button>
       </div>
     </div>
   );
